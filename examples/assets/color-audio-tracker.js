@@ -1,3 +1,11 @@
+tracking.ColorTracker.registerColor('green', function(r, g, b) {
+  // 35,137,87
+  if (r < 50 && (g > 100 && g < 200) && b < 100) {
+    return true;
+  }
+  return false;
+});
+
 Point.centerOf = function(rect) {
   return new Point(rect.x + (rect.width / 2), rect.y + (rect.height / 2));
 };
@@ -14,12 +22,14 @@ Instrument = function(name, shapeSampleMap) {
   var that = this;
 
   this.Name = name;
-  this.ShapeSampleMap = createSampleMap(shapeSampleMap);
+  this.ShapeSampleMap = shapeSampleMap;
+  // this.ShapeSampleMap = createSampleMap(shapeSampleMap);
 
   this.PlayByShape = function(shape) {
     if (that.ShapeSampleMap[shape]) {
       console.log(shape);
-      that.ShapeSampleMap[shape].play();
+      new Audio('assets/audio/' + that.ShapeSampleMap[shape]).play();
+      // that.ShapeSampleMap[shape].play();
     }
   }
 
@@ -43,7 +53,7 @@ ColorAudioTracker = function(options) {
     },
     recognizer: new DollarRecognizer(),
     movementDetectorConfig: {
-      numberOfConsequentPoints: 5,
+      numberOfConsequentPoints: 10,
       velocityThreshold: 0.08, // px/ms
       timeThreshold: 2000 // ms
     }
@@ -72,7 +82,6 @@ ColorAudioTracker = function(options) {
     var handler_params = custom_handlers[i]();
     this.recognizer.AddGesture(handler_params[0], handler_params[1]);
   }
-
   function createMovementDetectors() {
     var map = {};
     var colors = that.colors();
@@ -119,10 +128,10 @@ ColorAudioTracker = function(options) {
 
   function createInstruments() {
     return {
-      "drums": new Instrument("drums", { vertical_stroke: "kick-acoustic01.wav",
-        caret: "snare-acoustic01.wav" }),
-      "guitar": new Instrument("guitar", { vertical_stroke: "guitar_01.wav",
-        caret: "guitar_02.wav" }),
+      "ambiance": new Instrument("ambiance", { circle: "ambiance.wav" }),
+      "effects1": new Instrument("effects1", { circle: "effects-thunder.mp3" }),
+      "effects2": new Instrument("effects2", { circle: "effects-birds.mp3" }),
+      "effects3": new Instrument("effects3", { circle: "allahu-akbar.mp3"})
     }
   }
 
@@ -134,10 +143,10 @@ ColorAudioTracker = function(options) {
       var context = that.context;
 
       event.data.forEach(function(rect) {
-        // context.clearRect(0, 0, that.canvas.width, that.canvas.height);
-        // context.beginPath();
+        context.clearRect(0, 0, that.canvas.width, that.canvas.height);
+        context.beginPath();
 
-        // context.rect(rect.x, rect.y, rect.width, rect.height);
+        context.rect(rect.x, rect.y, rect.width, rect.height);
         // console.log(rect);
 
         var centerPoint = Point.centerOf(rect);
@@ -146,11 +155,11 @@ ColorAudioTracker = function(options) {
         that.colorMovementDetector[rect.color].processMeasurement(
           centerPoint, Date.now());
 
-        // context.fillRect(centerPoint.X, centerPoint.Y, 10, 10);
+        context.fillRect(centerPoint.X, centerPoint.Y, 10, 10);
         // console.log(centerPoint);
 
-        // context.stroke();
-        // context.closePath();
+        context.stroke();
+        context.closePath();
       });
     }
   }
