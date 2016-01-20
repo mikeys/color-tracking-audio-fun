@@ -28,14 +28,23 @@ MovementDetector = function(config, onMovementStopCallback) {
         that.measurements = [];
         break;
       case that.movementStates.MOVEMENT_STOPPED_NORMALLY:
-
-        that.onMovementStop(measurements);
+        that.onMovementStop(that.extractPointsFromMeasurements(measurements));
 
         that.measurements = [];
         break;
     }
 
     return true;
+  }
+
+  this.extractPointsFromMeasurements = function() {
+    var points = [];
+
+    for (var i = 0; i < that.measurements.length; i++) {
+      points += that.measurements[i].point
+    }
+
+    return points;
   }
 
   this.recordMeasurement = function(point, timestamp) {
