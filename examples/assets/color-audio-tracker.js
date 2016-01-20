@@ -34,7 +34,9 @@ ColorAudioTracker = function(options) {
   this.colorInstrument = options.colorInstrument;
   this.colors = function() { return Object.keys(that.colorInstrument); };
   this.tracker = new tracking.ColorTracker(that.colors());
-  this.colorMovementDetector = initializeMovementDetectors();
+  that.movementDetectorConfig = options.movementDetectorConfig;
+  this.colorMovementDetector = createMovementDetectors();
+  console.log(that.colorMovementDetector);
   this.recognizer = options.recognizer;
   this.videoElemId = options.videoElemId;
   this.velocityThreshold = options.velocityThreshold;
@@ -43,11 +45,15 @@ ColorAudioTracker = function(options) {
   this.canvas = document.getElementById('canvas');
   this.context = that.canvas.getContext('2d');
 
-  function initializeMovementDetectors() {
+  function createMovementDetectors() {
     var map = {};
     for (var color in that.colors()) {
       map[color] = new MovementDetector(that.movementDetectorConfig, onMovementStop);
+      console.log(map[color]);
+      console.log(that.movementDetectorConfig);
     }
+
+    console.log(map);
 
     return map;
   };
@@ -73,6 +79,7 @@ ColorAudioTracker = function(options) {
         // console.log(that.recognizer.Recognize(points));
 
         var centerPoint = Point.centerOf(rect);
+        console.log(that.colorMovementDetector);
         that.colorMovementDetector[rect.color].recordMeasurement(
           centerPoint, Date.now());
 
