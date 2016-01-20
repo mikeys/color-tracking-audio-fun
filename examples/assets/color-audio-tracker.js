@@ -25,8 +25,6 @@ ColorAudioTracker = function(options) {
     }
   };
 
-  console.log(defaultOptions);
-
   defaultOptions.extendOwn(options);
   options = defaultOptions;
   console.log(options);
@@ -36,7 +34,6 @@ ColorAudioTracker = function(options) {
   this.tracker = new tracking.ColorTracker(that.colors());
   that.movementDetectorConfig = options.movementDetectorConfig;
   this.colorMovementDetector = createMovementDetectors();
-  console.log(that.colorMovementDetector);
   this.recognizer = options.recognizer;
   this.videoElemId = options.videoElemId;
   this.velocityThreshold = options.velocityThreshold;
@@ -47,10 +44,10 @@ ColorAudioTracker = function(options) {
 
   function createMovementDetectors() {
     var map = {};
-    for (var color in that.colors()) {
+    var colors = that.colors();
+    for (var i = 0; i < colors.length; i++) {
+      var color = colors[i];
       map[color] = new MovementDetector(that.movementDetectorConfig, onMovementStop);
-      console.log(map[color]);
-      console.log(that.movementDetectorConfig);
     }
 
     console.log(map);
@@ -59,6 +56,7 @@ ColorAudioTracker = function(options) {
   };
 
   function onMovementStop(points) {
+    console.log(points);
     console.log(that.recognizer.Recognize(points));
   }
 
@@ -75,12 +73,11 @@ ColorAudioTracker = function(options) {
 
         context.rect(rect.x, rect.y, rect.width, rect.height);
         console.log(rect);
-        // var points = [new Point(0,0), new Point(0, 50), new Point(50, 0), new Point(50, 50), new Point(0,0)]
-        // console.log(that.recognizer.Recognize(points));
 
         var centerPoint = Point.centerOf(rect);
         console.log(that.colorMovementDetector);
-        that.colorMovementDetector[rect.color].recordMeasurement(
+
+        that.colorMovementDetector[rect.color].processMeasurement(
           centerPoint, Date.now());
 
         context.fillRect(centerPoint.x, centerPoint.y, 1, 1);

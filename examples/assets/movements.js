@@ -74,8 +74,8 @@ MovementDetector = function(config, onMovementStopCallback) {
       var t2 = measurements[measurements.length - 1].timestamp;
 
       if (t2 - t1 > timeThreshold) {
-        return MOVEMENT_STOPPED_WITH_ERROR;  
-      }  
+        return MOVEMENT_STOPPED_WITH_ERROR;
+      }
     }
 
     var sumVelocity = 0
@@ -92,15 +92,14 @@ MovementDetector = function(config, onMovementStopCallback) {
       sumVelocity += distance / (timestampB - timestampA);
     }
 
-    // console.log("Average velocity: " + sumVelocity / measurements.length);
+    console.log("Average velocity: " + sumVelocity / measurements.length);
 
     if (sumVelocity / measurements.length < velocityThreshold) {
-      // console.log("Movement velocity is below threshold");
+      console.log("Movement velocity is below threshold");
       return that.movementStates.MOVEMENT_STOPPED_NORMALLY;
     } else {
-      // console.log("Movement velocity is above threshold");
-      return that.movementStates.MOVEMENT_CONTINUES;      
+      console.log("Movement velocity is above threshold");
+      return that.movementStates.MOVEMENT_CONTINUES;
     }
   }
 }
-
