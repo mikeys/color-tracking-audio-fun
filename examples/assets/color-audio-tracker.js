@@ -11,14 +11,14 @@ Object.prototype.extendOwn = function(obj) {
 };
 
 Instrument = function(name, shapeSampleMap) {
-  that = this;
+  var that = this;
 
   this.Name = name;
   this.ShapeSampleMap = createSampleMap(shapeSampleMap);
 
   this.PlayByShape = function(shape) {
     if (that.ShapeSampleMap[shape]) {
-      console.log(that.Name);
+      console.log(shape);
       that.ShapeSampleMap[shape].play();
     }
   }
@@ -43,7 +43,7 @@ ColorAudioTracker = function(options) {
     },
     recognizer: new DollarRecognizer(),
     movementDetectorConfig: {
-      numberOfConsequentPoints: 10,
+      numberOfConsequentPoints: 5,
       velocityThreshold: 0.08, // px/ms
       timeThreshold: 2000 // ms
     }
@@ -119,9 +119,9 @@ ColorAudioTracker = function(options) {
 
   function createInstruments() {
     return {
-      "drums": new Instrument("drums", { circle: "kick-acoustic01.wav",
+      "drums": new Instrument("drums", { vertical_stroke: "kick-acoustic01.wav",
         caret: "snare-acoustic01.wav" }),
-      "guitar": new Instrument("guitar", { circle: "guitar_01.wav",
+      "guitar": new Instrument("guitar", { vertical_stroke: "guitar_01.wav",
         caret: "guitar_02.wav" }),
     }
   }
