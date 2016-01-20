@@ -4,7 +4,10 @@
   <meta charset="utf-8">
   <title>tracking.js - first tracking</title>
   <link rel="stylesheet" href="assets/demo.css">
-  <script src="../build/tracking-min.js"></script>
+  <script src="assets/tracking-min.js"></script>
+  <script src="assets/dollar.js"></script>
+  <script src="assets/color-audio-tracker.js"></script>
+
   <style>
     #canvas,
     #video {
@@ -30,43 +33,16 @@
     <canvas id="canvas" width="400" height="300"></canvas>
   </div>
   <script>
-  var colors = new tracking.ColorTracker(['magenta']);
-  var canvas = document.getElementById('canvas');
-  var context = canvas.getContext('2d');
-  var currentRect = {};
 
-  colors.on('track', function(event) {
-    if (event.data.length === 0) {
-      // No colors were detected in this frame.
-    } else {
-      console.log(event.data.length)
-      event.data.forEach(function(rect) {
-        context.clearRect(0, 0, canvas.width, canvas.height)
-        context.beginPath();
+  var trackerOptions = {
+    colorInstrument: {
+      'yellow': 'drums'
+    },
+    canvas: document.getElementById('canvas'),
+    videoElemId: "#video"
+  };
 
-        context.rect(rect.x, rect.y, rect.width, rect.height);
-        console.log(rect);
-
-        var centerPoint = Point.centerOf(rect);
-        context.fillRect(centerPoint.x, centerPoint.y, 1, 1);
-        console.log(centerPoint);
-
-        context.stroke();
-        context.closePath();
-      });
-    }
-  });
-
-  tracking.track('#video', colors, { camera: true });
-
-  Point = function(x, y) {
-    this.x = x;
-    this.y = y
-  }
-
-  Point.centerOf = function(rect) {
-    return new Point(rect.x + (rect.width / 2), rect.y + (rect.height / 2))
-  }
+  new ColorAudioTracker(trackerOptions).init();
 
   </script>
 </body>
