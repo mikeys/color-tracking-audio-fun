@@ -10,6 +10,30 @@ Object.prototype.extendOwn = function(obj) {
    }
 };
 
+Instrument = function(name, shapeSampleMap) {
+  that = this;
+
+  this.Name = name;
+  this.ShapeSampleMap = createSampleMap(shapeSampleMap);
+
+  this.PlayByShape = function(shape) {
+    if (that.ShapeSampleMap[shape]) {
+      console.log(that.Name);
+      that.ShapeSampleMap[shape].play();
+    }
+  }
+
+  function createSampleMap(shapeSampleMap) {
+    var map = {};
+    for (var key in shapeSampleMap) {
+      if (shapeSampleMap.hasOwnProperty(key)) {
+        map[key] = new Audio('assets/audio/' + shapeSampleMap[key]);
+      }
+    }
+    return map;
+  }
+}
+
 ColorAudioTracker = function(options) {
   var that = this;
 
@@ -19,8 +43,8 @@ ColorAudioTracker = function(options) {
     },
     recognizer: new DollarRecognizer(),
     movementDetectorConfig: {
-      numberOfConsequentPoints: 20,
-      velocityThreshold: 0.1, // px/ms
+      numberOfConsequentPoints: 10,
+      velocityThreshold: 0.08, // px/ms
       timeThreshold: 2000 // ms
     }
   };
@@ -37,6 +61,7 @@ ColorAudioTracker = function(options) {
   this.recognizer = options.recognizer;
   this.videoElemId = options.videoElemId;
   this.velocityThreshold = options.velocityThreshold;
+  this.instruments = createInstruments();
 
   // For debugging
   this.canvas = document.getElementById('canvas');
@@ -47,15 +72,17 @@ ColorAudioTracker = function(options) {
     var colors = that.colors();
     for (var i = 0; i < colors.length; i++) {
       var color = colors[i];
-      map[color] = new MovementDetector(that.movementDetectorConfig, onMovementStop);
-    }
 
-    console.log(map);
+      var config = { color: color }
+      config.extendOwn(that.movementDetectorConfig);
+      console.log(config);
+      map[color] = new MovementDetector(config, onMovementStop);
+    }
 
     return map;
   };
 
-  function onMovementStop(points) {
+  function onMovementStop(points, color) {
     var context = that.context;
 
     context.beginPath();
@@ -69,7 +96,28 @@ ColorAudioTracker = function(options) {
     context.closePath();
 
     // console.log(points);
-    console.log(that.recognizer.Recognize(points));
+    var result = that.recognizer.Recognize(points.reverse());
+    if (result.Score > 0) {
+        playAudio(color, result.Name)
+    }
+  }
+
+  function playAudio(color, shape) {
+    console.log(color);
+    var instrument = that.colorInstrument[color];
+    console.log(instrument);
+    console.log(that.instruments);
+    console.log(that.instruments[instrument]);
+    that.instruments[instrument].PlayByShape(shape);
+  }
+
+  function createInstruments() {
+    return {
+      "drums": new Instrument("drums", { circle: "kick-acoustic01.wav",
+        caret: "snare-acoustic01.wav" }),
+      "guitar": new Instrument("guitar", { circle: "guitar_01.wav",
+        caret: "guitar_02.wav" }),
+    }
   }
 
   function track(event) {
