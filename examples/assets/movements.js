@@ -74,7 +74,7 @@ MovementDetector = function(config, onMovementStopCallback) {
       var t2 = measurements[measurements.length - 1].timestamp;
 
       if (t2 - t1 > timeThreshold) {
-        return MOVEMENT_STOPPED_WITH_ERROR;
+        return that.movementStates.MOVEMENT_STOPPED_WITH_ERROR;
       }
     }
 
@@ -87,7 +87,7 @@ MovementDetector = function(config, onMovementStopCallback) {
       var pointB = measurements[j].point;
       var timestampB = measurements[j].timestamp;
 
-      var distance = Math.sqrt(Math.pow((pointB.x - pointA.x), 2) + Math.pow((pointB.y - pointA.y), 2));
+      var distance = Math.sqrt(Math.pow((pointB.X - pointA.X), 2) + Math.pow((pointB.Y - pointA.Y), 2));
 
       sumVelocity += distance / (timestampB - timestampA);
     }
