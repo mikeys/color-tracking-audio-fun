@@ -19,7 +19,7 @@ ColorAudioTracker = function(options) {
     },
     recognizer: new DollarRecognizer(),
     movementDetectorConfig: {
-      numberOfConsequentPoints: 30,
+      numberOfConsequentPoints: 20,
       velocityThreshold: 0.1, // px/ms
       timeThreshold: 2000 // ms
     }
@@ -56,7 +56,19 @@ ColorAudioTracker = function(options) {
   };
 
   function onMovementStop(points) {
-    console.log(points);
+    var context = that.context;
+
+    context.beginPath();
+    for (var i = 0; i < points.length; i++) {
+      // console.log(points[i].X);
+      // console.log(points[i].Y);
+      context.fillRect(points[i].X, points[i].Y, 10, 10);
+    }
+
+    context.stroke();
+    context.closePath();
+
+    // console.log(points);
     console.log(that.recognizer.Recognize(points));
   }
 
@@ -68,23 +80,23 @@ ColorAudioTracker = function(options) {
       var context = that.context;
 
       event.data.forEach(function(rect) {
-        context.clearRect(0, 0, that.canvas.width, that.canvas.height);
-        context.beginPath();
+        // context.clearRect(0, 0, that.canvas.width, that.canvas.height);
+        // context.beginPath();
 
-        context.rect(rect.x, rect.y, rect.width, rect.height);
-        console.log(rect);
+        // context.rect(rect.x, rect.y, rect.width, rect.height);
+        // console.log(rect);
 
         var centerPoint = Point.centerOf(rect);
-        console.log(that.colorMovementDetector);
+        // console.log(that.colorMovementDetector);
 
         that.colorMovementDetector[rect.color].processMeasurement(
           centerPoint, Date.now());
 
-        context.fillRect(centerPoint.x, centerPoint.y, 1, 1);
-        console.log(centerPoint);
+        // context.fillRect(centerPoint.X, centerPoint.Y, 10, 10);
+        // console.log(centerPoint);
 
-        context.stroke();
-        context.closePath();
+        // context.stroke();
+        // context.closePath();
       });
     }
   }

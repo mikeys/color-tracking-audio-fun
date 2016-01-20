@@ -8,6 +8,7 @@
 MovementDetector = function(config, onMovementStopCallback) {
   this.Config = config;
   this.measurements = [];
+  this.pointStorage = [];
 
   var that = this;
 
@@ -15,55 +16,94 @@ MovementDetector = function(config, onMovementStopCallback) {
     MOVEMENT_UNKNOWN: 'start recording',
     MOVEMENT_STOPPED_WITH_ERROR: 'stopped with error',
     MOVEMENT_STOPPED_NORMALLY: 'stopped normally',
-    MOVEMENT_CONTINUES: 'continues'
+    MOVEMENT_CONTINUES: 'continues',
+    MOVEMENT_IDLE: 'no movement'
   };
 
   this.state = that.movementStates.MOVEMENT_UNKNOWN;
+  this.prevState = that.movementStates.MOVEMENT_UNKNOWN;
 
   this.onMovementStop = onMovementStopCallback;
 
   this.processState = function() {
+    // console.log(that.state);
+    // var prevState = that.state;
+    // console.log("State: " + that.state);
+
     switch(that.state) {
       case that.movementStates.MOVEMENT_STOPPED_WITH_ERROR:
         that.measurements = [];
+        that.pointStorage = [];
+
+        // that.measurements = [];
         break;
       case that.movementStates.MOVEMENT_STOPPED_NORMALLY:
-        that.onMovementStop(that.extractPointsFromMeasurements(measurements));
+        // console.log()
 
-        that.measurements = [];
+        if (that.prevState != that.state) {
+
+          // var measurements = that.measurements.slice();
+          var points = that.pointStorage.slice();
+        
+          // console.log(measurements);
+          // console.log(that.extractPointsFromMeasurements(measurements));
+
+          that.onMovementStop(points);
+
+          if (that.measurements.length == that.Config.numberOfConsequentPoints) {
+            that.measurements = [];
+          }
+
+          that.pointStorage = [];
+
+          console.log('Stopped');  
+        } else {
+
+          // console.log('Idle');  
+        }
+        
         break;
     }
+
+    // that.prevState = that.state
 
     return true;
   }
 
   this.processMeasurement = function(point, timestamp) {
     that.recordMeasurement(point, timestamp);
-    that.getMovementState();
+    that.recalculateMovementState();
     that.processState();
   }
 
-  this.extractPointsFromMeasurements = function() {
-    var points = [];
+  // this.extractPointsFromMeasurements = function() {
+  //   var points = [];
 
-    for (var i = 0; i < that.measurements.length; i++) {
-      points += that.measurements[i].point
-    }
+  //   for (var i = 0; i < that.measurements.length; i++) {
+  //     // console.log(that.measurements[i].point)
+  //     points.push(that.measurements[i].point)
+  //   }
 
-    return points;
-  }
+  //   return points;
+  // }
 
   this.recordMeasurement = function(point, timestamp) {
     // if has enough measurements take the left one off
     if (that.measurements.length > that.Config.numberOfConsequentPoints) {
+      // console.log('Shifted');
       that.measurements.shift();
     }
 
+    // console.log('Added');
+
     // add new to the right
     that.measurements.push({point: point, timestamp: timestamp});
+    that.pointStorage.push(point);
   }
 
-  this.getMovementState = function() {
+  this.recalculateMovementState = function() {
+    that.prevState = that.state;
+
     var measurements = that.measurements;
     var velocityThreshold = that.Config.velocityThreshold;
     var timeThreshold = that.Config.timeThreshold;
@@ -74,11 +114,18 @@ MovementDetector = function(config, onMovementStopCallback) {
       var t2 = measurements[measurements.length - 1].timestamp;
 
       if (t2 - t1 > timeThreshold) {
-        return that.movementStates.MOVEMENT_STOPPED_WITH_ERROR;
+        that.state = that.movementStates.MOVEMENT_STOPPED_WITH_ERROR;
+        return;
+        // return that.movementStates.MOVEMENT_STOPPED_WITH_ERROR;
       }
     }
 
     var sumVelocity = 0
+
+    // console.log("***************");
+    // console.log(measurements);
+    // console.log(measurements.length);
+    // console.log("***************");
 
     for(var i = 0, j = i + 1; i < measurements.length - 1; i++, j++) {
       var pointA = measurements[i].point;
@@ -89,17 +136,23 @@ MovementDetector = function(config, onMovementStopCallback) {
 
       var distance = Math.sqrt(Math.pow((pointB.X - pointA.X), 2) + Math.pow((pointB.Y - pointA.Y), 2));
 
+      // console.log("=================");
+      // console.log(pointA);
+      // console.log(pointB);
+      // console.log(distance);
+      // console.log("=================");
+
       sumVelocity += distance / (timestampB - timestampA);
     }
 
-    console.log("Average velocity: " + sumVelocity / measurements.length);
+    // console.log("Average velocity: " + sumVelocity / measurements.length);
 
     if (sumVelocity / measurements.length < velocityThreshold) {
-      console.log("Movement velocity is below threshold");
-      return that.movementStates.MOVEMENT_STOPPED_NORMALLY;
+      // console.log("Movement velocity is below threshold");
+      that.state = that.movementStates.MOVEMENT_STOPPED_NORMALLY;
     } else {
-      console.log("Movement velocity is above threshold");
-      return that.movementStates.MOVEMENT_CONTINUES;
+      // console.log("Movement velocity is above threshold");
+      that.state = that.movementStates.MOVEMENT_CONTINUES;
     }
   }
 }
