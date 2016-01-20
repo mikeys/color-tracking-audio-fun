@@ -37,6 +37,12 @@ MovementDetector = function(config, onMovementStopCallback) {
     return true;
   }
 
+  this.processMeasurement = function(point, timestamp) {
+    that.recordMeasurement(point, timestamp);
+    that.getMovementState();
+    that.processState();
+  }
+
   this.extractPointsFromMeasurements = function() {
     var points = [];
 
@@ -68,8 +74,8 @@ MovementDetector = function(config, onMovementStopCallback) {
       var t2 = measurements[measurements.length - 1].timestamp;
 
       if (t2 - t1 > timeThreshold) {
-        return MOVEMENT_STOPPED_WITH_ERROR;
-      }
+        return MOVEMENT_STOPPED_WITH_ERROR;  
+      }  
     }
 
     var sumVelocity = 0
@@ -93,7 +99,8 @@ MovementDetector = function(config, onMovementStopCallback) {
       return that.movementStates.MOVEMENT_STOPPED_NORMALLY;
     } else {
       // console.log("Movement velocity is above threshold");
-      return that.movementStates.MOVEMENT_CONTINUES;
+      return that.movementStates.MOVEMENT_CONTINUES;      
     }
   }
 }
+
