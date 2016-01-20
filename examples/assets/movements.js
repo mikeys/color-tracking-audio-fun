@@ -48,6 +48,13 @@ MovementDetector = function(config, onMovementStopCallback) {
           // console.log(measurements);
           // console.log(that.extractPointsFromMeasurements(measurements));
 
+          // for debugging
+          // strs = [];
+          // for (var i = 0; i < points.length; i++) {
+          //   strs.push("new Point(" + points[i].X + "," + points[i].Y + ")");
+          // }
+          // console.log(strs.join(","));
+
           that.onMovementStop(points, that.Config.color);
 
           if (that.measurements.length == that.Config.numberOfConsequentPoints) {
