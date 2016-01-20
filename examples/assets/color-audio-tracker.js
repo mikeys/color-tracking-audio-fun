@@ -121,8 +121,6 @@ ColorAudioTracker = function(options) {
     console.log(color);
     var instrument = that.colorInstrument[color];
     console.log(instrument);
-    console.log(that.instruments);
-    console.log(that.instruments[instrument]);
     that.instruments[instrument].PlayByShape(shape);
   }
 
@@ -139,7 +137,6 @@ ColorAudioTracker = function(options) {
     if (event.data.length === 0) {
       // No colors were detected in this frame.
     } else {
-      console.log(event.data.length);
       var context = that.context;
 
       event.data.forEach(function(rect) {
