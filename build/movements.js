@@ -8,7 +8,8 @@
 MovementDetector = function(config, onMovementStopCallback) {
   this.Config = config;
   this.measurements = [];
-  this.state = MovementDetector.movementState.MOVEMENT_UNKNOWN;
+
+  var that = this;
 
   this.movementStates = {
     MOVEMENT_UNKNOWN: 'start recording',
@@ -17,18 +18,20 @@ MovementDetector = function(config, onMovementStopCallback) {
     MOVEMENT_CONTINUES: 'continues'
   };
 
+  this.state = that.movementState.MOVEMENT_UNKNOWN;
+
   this.onMovementStop = onMovementStopCallback;
 
   this.processState = function() {
-    switch(MovementDetector.state) {
-      case MovementDetector.movementStates.MOVEMENT_STOPPED_WITH_ERROR:
-        MovementDetector.measurements = [];
+    switch(that.state) {
+      case that.movementStates.MOVEMENT_STOPPED_WITH_ERROR:
+        that.measurements = [];
         break;
-      case MovementDetector.movementStates.MOVEMENT_STOPPED_NORMALLY:
+      case that.movementStates.MOVEMENT_STOPPED_NORMALLY:
 
-        onMovementStop(measurements);
+        that.onMovementStop(measurements);
 
-        MovementDetector.measurements = [];
+        that.measurements = [];
         break;
     }
 
@@ -37,18 +40,18 @@ MovementDetector = function(config, onMovementStopCallback) {
 
   this.recordMeasurement = function(point, timestamp) {
     // if has enough measurements take the left one off
-    if (MovementDetector.measurements.length > MovementDetector.Config.numberOfConsequentPoints) {
-      MovementDetector.measurements.shift();
+    if (that.measurements.length > that.Config.numberOfConsequentPoints) {
+      that.measurements.shift();
     }
 
     // add new to the right
-    MovementDetector.measurements.push({point: point, timestamp: timestamp});
+    that.measurements.push({point: point, timestamp: timestamp});
   }
 
-  MovementDetector.getMovementState = function() {
-    var measurements = MovementDetector.measurements;
-    var velocityThreshold = MovementDetector.Config.velocityThreshold;
-    var timeThreshold = MovementDetector.Config.timeThreshold;
+  this.getMovementState = function() {
+    var measurements = that.measurements;
+    var velocityThreshold = that.Config.velocityThreshold;
+    var timeThreshold = that.Config.timeThreshold;
 
     // check if last measurement was long time ago
     if (measurements.length > 2) {
@@ -78,10 +81,10 @@ MovementDetector = function(config, onMovementStopCallback) {
 
     if (sumVelocity / measurements.length < velocityThreshold) {
       // console.log("Movement velocity is below threshold");
-      return MovementDetector.movementStates.MOVEMENT_STOPPED_NORMALLY;
+      return that.movementStates.MOVEMENT_STOPPED_NORMALLY;
     } else {
       // console.log("Movement velocity is above threshold");
-      return MovementDetector.movementStates.MOVEMENT_CONTINUES;      
+      return that.movementStates.MOVEMENT_CONTINUES;      
     }
   }
 }
