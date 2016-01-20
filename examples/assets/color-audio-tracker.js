@@ -42,6 +42,12 @@ ColorAudioTracker = function(options) {
   this.canvas = document.getElementById('canvas');
   this.context = that.canvas.getContext('2d');
 
+  // register custom gestures
+  for (var i = 0; i < custom_handlers.length; i++) {
+    var handler_params = custom_handlers[i]();
+    this.recognizer.AddGesture(handler_params[0], handler_params[1]);
+  }
+
   function createMovementDetectors() {
     var map = {};
     var colors = that.colors();
